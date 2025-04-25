@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
   <meta charset="UTF-8">
   <title>Thư viện ảnh</title>
@@ -7,28 +7,51 @@
     body {
       font-family: Arial, sans-serif;
       background: #f9f9f9;
+      margin: 0;
+      padding: 0;
+    }
+    h1 {
+      text-align: center;
+      margin-top: 20px;
     }
     .gallery {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 10px;
+      gap: 20px;
       padding: 20px;
     }
-    .gallery img {
-      width: 100%;
-      height: auto;
+    .gallery-item {
+      background-color: #fff;
       border-radius: 8px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      width: 500px;   /* Kích thước chiều rộng */
+      height: 100px; /* Kích thước chiều cao */
+      overflow: hidden; /* Ẩn ảnh nếu quá kích thước */
+      text-align: center;
+    }
+    .gallery-item img {
+      width: 100%;  /* Đảm bảo ảnh không vượt quá khung */
+      height: 100%; /* Điều chỉnh chiều cao của ảnh */
+      object-fit: cover; /* Đảm bảo ảnh đầy đủ khung mà không bị bóp méo */
+    }
+    .gallery-item .caption {
+      padding: 5px;
+      background-color: #f1f1f1;
+      color: #333;
+      font-size: 12px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
     }
   </style>
 </head>
 <body>
-  <h1 style="text-align:center;">Thư viện ảnh</h1>
+  <h1>Thư viện ảnh</h1>
   <div class="gallery" id="gallery"></div>
 
   <script>
-    const apiKey = 'AIzaSyDBS2Zn6SRn8gkwLvkLu_kczp7jhBqIt10'; // ← Thay bằng API Key của bạn
-    const folderId = '1GvgNxIIGnv4MoWKiQwQxeO2fAAHv981m';    // ← Thay bằng Folder ID
+    const apiKey = 'AIzaSyDBS2Zn6SRn8gkwLvkLu_kczp7jhBqIt10'; // Thay bằng API Key của bạn
+    const folderId = '1GvgNxIIGnv4MoWKiQwQxeO2fAAHv981m';    // Thay bằng Folder ID của bạn
 
     async function loadImages() {
       const url = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents&key=${apiKey}&fields=files(id,name,mimeType)`;
@@ -37,12 +60,31 @@
       const data = await res.json();
 
       const gallery = document.getElementById('gallery');
+      gallery.innerHTML = '';  // Làm sạch gallery mỗi khi tải ảnh mới
+
+      // Duyệt qua các file ảnh và thêm vào gallery
       data.files.forEach(file => {
         if (file.mimeType.startsWith('image/')) {
+          // Tạo một div chứa ảnh và caption
+          const galleryItem = document.createElement('div');
+          galleryItem.classList.add('gallery-item');
+
+          // Tạo thẻ img để hiển thị ảnh
           const img = document.createElement('img');
-          img.src = `https://drive.google.com/uc?id=${file.id}`;
+          img.src = `https://drive.google.com/uc?id=${file.id}`;  // Đảm bảo URL đúng
           img.alt = file.name;
-          gallery.appendChild(img);
+
+          // Tạo caption cho ảnh
+          const caption = document.createElement('div');
+          caption.classList.add('caption');
+          caption.innerText = file.name;
+
+          // Thêm ảnh và caption vào khung gallery item
+          galleryItem.appendChild(img);
+          galleryItem.appendChild(caption);
+
+          // Thêm gallery item vào thư viện
+          gallery.appendChild(galleryItem);
         }
       });
     }
